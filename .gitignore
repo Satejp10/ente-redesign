@@ -1,1 +1,5 @@
 reference/
+app/node_modules/
+app/.svelte-kit/
+
+# docs/ is deliberately NOT ignored: GitHub Pages serves the built site from it.

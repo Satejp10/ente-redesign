@@ -1,0 +1,1 @@
+import"../chunks/CQamuEpq.js";import"../chunks/BEj718is.js";import{S as t}from"../chunks/Dlpzb824.js";function r(o){t(o,{note:"Search is out of scope for this concept. The Photos tab is the whole demo."})}export{r as component};

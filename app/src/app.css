@@ -1,0 +1,82 @@
+@import 'tailwindcss';
+
+/*
+ * "Ash" palette.
+ *
+ * Deliberately NOT Ente's: Ente's own colors.dart uses Spotify's exact #1DB954
+ * as its primary, untinted pure black/white neutrals, and — the real bug —
+ * status colors that are byte-identical in light and dark (green/red and their
+ * Dark/Darker tiers are passed unchanged into both schemes). Every token below
+ * therefore has a separate light and dark value, status colors included.
+ */
+:root {
+	--bg: #fbfbfc;
+	--surface: #f2f3f5;
+	--border: #e3e5e9;
+	--text: #1a1c1f;
+	--text-muted: #6b7075;
+	--accent: #5b6ee1;
+	--danger: #c8484b;
+	--success: #3f8a5c;
+
+	/* Tile placeholders sit under photos; they need to read as "loading", not "broken". */
+	--placeholder-lightness: 82%;
+	--placeholder-saturation: 14%;
+
+	--font-ui: 'Inter', system-ui, -apple-system, sans-serif;
+	--font-display: 'Space Grotesk', var(--font-ui);
+
+	color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--bg: #0e0f11;
+		--surface: #17181b;
+		--border: #26282c;
+		--text: #f3f4f6;
+		--text-muted: #9a9ea5;
+		--accent: #7e8dea;
+		--danger: #e5726f;
+		--success: #62b083;
+
+		--placeholder-lightness: 20%;
+		--placeholder-saturation: 12%;
+	}
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	overscroll-behavior-y: none;
+}
+
+body {
+	background: var(--bg);
+	color: var(--text);
+	font-family: var(--font-ui);
+	-webkit-font-smoothing: antialiased;
+	-webkit-tap-highlight-color: transparent;
+}
+
+h1,
+h2,
+h3 {
+	font-family: var(--font-display);
+	letter-spacing: -0.015em;
+}
+
+button {
+	font: inherit;
+	color: inherit;
+	background: none;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+}
