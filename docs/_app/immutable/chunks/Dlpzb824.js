@@ -1,0 +1,1 @@
+import{a as o,f as l,s as p}from"./CQamuEpq.js";import{O as v,M as i,Y as f,N as m}from"./fWfAt6Wa.js";var c=l('<div class="stub svelte-12b8350"><p class="svelte-12b8350"> </p></div>');function b(s,a){var t=c(),e=i(t),r=f(e,!0);m(t),v(()=>p(r,a.note)),o(s,t)}export{b as S};

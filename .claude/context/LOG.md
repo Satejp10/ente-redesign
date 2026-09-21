@@ -82,3 +82,130 @@ re-skin inside Ente's existing Inter/`EnteTheme` language or a new visual
 direction.
 
 **Generated:** report SR-ente-redesign-001.
+
+---
+
+## 2026-09-21 — Next phase planned in chat (no code)
+
+**Session:** Claude.ai chat thread (not Claude Code)
+
+**Goal:** Decide what the audit feeds into, and hand the result back to Claude
+Code as `HANDOFF.md` (HO-ente-redesign-001).
+
+**Did:**
+- Answered the four open questions SR-001 left for the user (below).
+- Chose the "Ash" palette and wrote `HANDOFF.md`.
+
+**Decisions:**
+- *Build a web prototype, not Ente's Flutter app* — a demo needs fast iteration,
+  and the real build needs Flutter + Android SDK + Rust with a
+  rebuild-and-reinstall loop every time. (Rejected: editing the real app.)
+- *Scope: Photos grid → viewer → multi-select, one PR each* — each piece gets
+  judged on the phone before the next starts. (Rejected: a written gap-analysis
+  pass first; the owner chose to go straight to screens.)
+- *Look: "Ash"* — it fixes three faults in Ente's
+  `mobile/apps/photos/lib/theme/colors.dart`: a primary that is Spotify's exact
+  `#1DB954`, untinted pure-black/white neutrals, and status colors shared
+  byte-for-byte between light and dark. (Rejected: Liquid Glass, vetoed by the
+  owner; three other style tiles.)
+- *Behaviour reference: Google Photos on Android, via Immich* — Immich is open
+  source and deliberately Google-Photos-like. Immich mobile shows how it should
+  look on a phone; Immich web shows how to build it on the web.
+- *Stack: SvelteKit 2 + Svelte 5 + Tailwind 4, static build* — exactly Immich
+  web's stack, so its timeline code reads 1:1 as reference. (Rejected: React,
+  which would need every Immich pattern translated; plain JS, too much
+  hand-rolled state for virtualization and gestures.)
+- *Hosting: GitHub Pages from `main`, folder `/docs`* — needs no workflow file.
+- *Dark mode follows the OS setting only.*
+
+**Answers to SR-001's open questions:** straight to screens, no recommendations
+document; scope is the grid/viewer/multi-select loop, not the whole app; the
+component-layer question is moot now the build is not Flutter; and this is a new
+visual direction ("Ash"), not a re-skin of Ente's language.
+
+**Left open:** whether Immich source may be lifted under AGPL (default until
+decided: re-implement, never paste); whether to follow Ash or Immich's own look
+where they disagree (default: Ash on the Immich/Google layout); the Feed tab
+(out of scope for now).
+
+---
+
+## 2026-09-21 — Audit of HANDOFF.md, then the Photos grid
+
+**Session:** `session_01BM4Nbwy1PXGxL1AFMySpz4` (Claude Code web)
+
+**Goal:** Verify `HANDOFF.md` against the real repo per its Section 0, then, on
+the owner's go-ahead, scaffold `app/` and build the Photos tab.
+
+**Did — audit:**
+- Verified the handoff against the repo. It was largely accurate. Seven
+  divergences found and reported; details in the drift report. The substantive
+  one: `AUDIT.md` and SR-001 describe redesigning Ente's **Flutter** app, while
+  the handoff redefines the project as a **web prototype that never touches
+  Flutter**. That is a deliberate later pivot, so the handoff wins.
+- Confirmed all three "Ash" rationale claims against
+  `reference/ente/mobile/apps/photos/lib/theme/colors.dart`: `:322`
+  `_primary500 = Color.fromRGBO(29, 185, 84, 1)` is `#1DB954` exactly; `:266`
+  and `:271` are pure black and pure white; `green`/`red` and their Dark/Darker
+  tiers go into both `lightScheme` (`:185-193`) and `darkScheme` (`:238-245`)
+  unchanged.
+- Cloned `reference/immich` at `202015e` (166 MB) and confirmed the stack claim
+  from `web/package.json`: svelte 5.56.10, @sveltejs/kit ^2.56.1, tailwindcss
+  ^4.2.4, and — usefully — `@sveltejs/adapter-static` ^3.0.8 already in their
+  deps. They are further ahead on the toolchain than the handoff said (Vite 8,
+  TypeScript 6 via the Go port) and web is a pnpm workspace; neither matters for
+  reading their code.
+
+**Did — build:**
+- Scaffolded `app/` by hand rather than via `npx sv create`, and built the
+  Photos tab: seeded 3,200-photo library across four years, virtualized day-
+  grouped grid, three-level pinch density, right-edge year scrubber, fade-in
+  tiles with tap-to-retry, tab bar with Albums/Search stubs, PWA manifest with
+  generated icons, Ash tokens in light and dark.
+- Wrote `CLAUDE.md` carrying the project's hard rules, per HANDOFF Section 10.
+
+**Decisions:**
+- *Fold the layout insets into `buildLayout` rather than the scroll container's
+  padding* — one coordinate system means tile positions, scroll offsets and
+  scrubber fractions all mean the same thing. Padding on the scroller would have
+  put a constant offset between them, which is exactly the kind of off-by-60px
+  that shows up only on a phone.
+- *One thumbnail request size (400px) for every density level* — asking for a
+  different width per level would change the URL and re-download every visible
+  photo on each pinch step, which is precisely when the app must not stutter.
+- *Change density during the pinch, not on release* — copied from Immich mobile
+  (`timeline_pinch_zoom.dart`), and it is what makes the gesture feel like direct
+  manipulation rather than a toggle.
+- *Hold the photo under the fingers still through a density change* — without
+  the anchor, the grid re-flows around the top of the viewport and whatever you
+  were looking at jumps off screen. Reads as a bug even though the feature works.
+- *Scrubber gets its own 38px gutter rather than overlaying the grid* — first
+  attempt let it overlay, and the year labels were unreadable over light photos.
+- *`ssr = false` and `trailingSlash = 'always'`* — the grid needs a real viewport
+  to measure, and directory-style routes are served correctly by every static
+  host rather than relying on extensionless-URL rewriting.
+- *No spinner anywhere* — a failed thumbnail shows a tap-to-retry glyph over its
+  placeholder colour. An endless spinner is the failure mode being designed out.
+
+**Verified in headless Chromium** (Playwright, 412×915, touch enabled), not by
+eye: 30 tiles in the DOM against a 157,109px timeline and unchanged after a deep
+scroll; pinch dispatched as real two-finger touch points moves 3 → 2 → 5
+columns and survives reload; the scrubber drag shows "March 2025" and jumps;
+aborting every image yields 30 retry affordances and zero spinners; zero console
+errors. **Smoothness on a real phone is not verified and is the owner's call.**
+
+**Dead ends:**
+- Routing headless Chromium through the sandbox's `HTTPS_PROXY` to fetch
+  thumbnails: the proxy swallows loopback requests too, so the local page itself
+  returned blank (`title: ''`, zero tiles). `bypass: '127.0.0.1,localhost'` did
+  not help. Fixed by pre-fetching 120 photos with curl and fulfilling
+  `**/picsum.photos/**` from disk inside the test. Harness-only; a real phone
+  reaches picsum directly.
+- `NODE_PATH` does not work for ESM imports — the global `playwright` had to be
+  imported by absolute path.
+
+**Left open:** the two questions the handoff itself left open (AGPL lifting, Ash
+vs Immich's look where they disagree) are still unanswered; both are running on
+their stated defaults.
+
+**Next:** the viewer (open a photo), then multi-select — one PR each.
