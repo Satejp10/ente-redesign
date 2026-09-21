@@ -265,3 +265,69 @@ outstanding, instead of failing on every push, and starts deploying by itself
 the moment the source is set to Actions. The three branches of that check were
 tested locally against mocked API responses before pushing.
 
+---
+
+## 2026-09-21 — Pages fix lands; the project starts shedding the Ente name
+
+**Session:** `session_01BM4Nbwy1PXGxL1AFMySpz4` (Claude Code web) — same session as the
+two entries above.
+
+**Did:**
+- PR #5 merged at 12:06Z (`924fffd`). The workflow run on `main` that followed
+  **succeeded** (run `35597592034`), which is the point: it typechecks, builds,
+  then skips the deploy with a warning instead of failing. `main` is green with
+  Pages still off.
+- Confirmed by request rather than by assumption that the site is still down:
+  `curl https://satejp10.github.io/ente-redesign/` → **HTTP 404**. Nothing is
+  live and nothing will be until a human sets Settings → Pages → Source →
+  GitHub Actions.
+- Restarted the working branch from `origin/main` again after the merge.
+- Generated status report SR-ente-redesign-002.
+
+**The owner raised a rename**, in their words: *"my reason for starting this was
+ente's sub part ui but this is turning into a full fetched app. So to avoid
+tnc/copyright or whatever."* They asked whether renaming the repo and URL would
+be painful, or whether a fresh repo would be cleaner.
+
+**Answered: rename in place; a new repo is not worth it.** GitHub renames in one
+field, redirects the old URL, and keeps every commit, PR and star. Inside the
+repo it is about seven files and ten lines — `app/svelte.config.js` (base path,
+2), `app/package.json` (name), `app/package-lock.json`, the `localStorage` key
+in `density.svelte.ts` (`ente-redesign.density`), `app/static/manifest.webmanifest`,
+`README.md` and `CLAUDE.md`. `docs/` regenerates. `AUDIT.md` keeps saying "Ente"
+and should — it is an audit *of* Ente's real app — and `LOG.md` and SR-001 keep
+their historical references because this file is append-only.
+
+**Timing matters and is the one non-obvious part:** the Pages URL changes with
+the repo name and GitHub does not redirect a renamed project site. Nothing is
+live yet, so right now the rename costs nothing. Doing it after switching Pages
+on means doing the job twice. Hence: name → rename → then Pages.
+
+**Also flagged:** the repo name is not what does the disclaiming work. The
+"unofficial concept, not affiliated, no logos, no copied code" line on every
+screen is. Dropping the name is still worth doing on its own merits now that
+this is its own app.
+
+**Proposed names** (none chosen — the owner dismissed the picker without
+selecting): **Grain** (film grain; short, photographic, nothing in the photo
+space owns it — my recommendation), **Pinch** (names the differentiator but ties
+the app to one feature), **Roll** (camera roll; shortest, very common word),
+**Tessera** (a single mosaic tile, which is what the grid is; rarest, hardest to
+spell).
+
+**Found while verifying:** `docs/` is **not byte-reproducible**. Rebuilding with
+no source change still produces a diff, because `docs/_app/version.json` carries
+a build timestamp and the content hashes move with it — 16 changed paths from a
+no-op rebuild. Harmless, but it means every rebuild commit carries noise. The
+rebuild was reverted rather than committed for this report.
+
+**Also confirmed this session:** `npm run check` → 158 files, 0 errors, 0
+warnings. `npm run build` → clean. Both `reference/` clones still present,
+untouched and gitignored (ente `d3839ab`, immich `202015e`).
+
+**Blocked on the owner, both items:** the name, and the Pages switch.
+
+**Next:** unchanged after the rename — the viewer (open a photo), then
+multi-select, one PR each.
+
+**Generated:** report SR-ente-redesign-002.
