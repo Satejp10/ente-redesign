@@ -55,12 +55,21 @@ Append `?debug` to the URL for a live count of tiles in the DOM.
 
 ## Deployment
 
-Live at <https://satejp10.github.io/ente-redesign/>.
+Live at <https://satejp10.github.io/ente-redesign/> once Pages is switched on.
 
 `.github/workflows/pages.yml` rebuilds and publishes on every push to `main`;
 it typechecks first, so a push that fails `npm run check` does not deploy.
-Pushing to `.github/workflows/` from a cloud session works — verified
-2026-09-21, contrary to what `HANDOFF.md` assumed.
+
+Two things that cost a cycle to learn, so do not re-derive them:
+
+- **Pushing to `.github/workflows/` from a cloud session works.** Verified
+  2026-09-21, contrary to what `HANDOFF.md` assumed.
+- **A workflow cannot enable Pages.** `actions/configure-pages` with
+  `enablement: true` fails with *"Create Pages site failed: Resource not
+  accessible by integration"* — the Actions token is refused on that API. A
+  human sets Settings → Pages → Source → GitHub Actions once. The workflow
+  checks the Pages API first and skips the deploy with a warning until then,
+  so an unconfigured repository leaves `main` green rather than permanently red.
 
 ## Design tokens — "Ash"
 

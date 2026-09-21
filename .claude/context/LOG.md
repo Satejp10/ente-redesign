@@ -241,3 +241,27 @@ workflow's `enablement: true` is the way round that; if the repository blocks it
 the owner flips one switch in Settings once.
 
 **Next:** unchanged — the viewer (open a photo), then multi-select.
+
+### Correction to the entry above ("Continuous deploy to Pages")
+
+`actions/configure-pages@v5` with `enablement: true` does **not** turn Pages on.
+The first run on `main` (`32f40e4`) failed there:
+
+```
+Get Pages site failed.    Error: Not Found
+Create Pages site failed. Error: Resource not accessible by integration
+```
+
+Everything before it passed — `npm ci`, `npm run check`, `npm run build` all
+green in CI. Only the enablement call failed. The Actions `GITHUB_TOKEN` is
+refused on the create-a-Pages-site API regardless of `permissions:`, so no
+workflow can bootstrap Pages on a repository where it has never been enabled.
+A human does it once: Settings → Pages → Source → GitHub Actions.
+
+Fixed by querying `GET /repos/{repo}/pages` first and skipping the deploy steps
+with a `::warning::` when Pages is absent (404) or publishing from a branch
+(`build_type != "workflow"`). `main` therefore stays green while the switch is
+outstanding, instead of failing on every push, and starts deploying by itself
+the moment the source is set to Actions. The three branches of that check were
+tested locally against mocked API responses before pushing.
+

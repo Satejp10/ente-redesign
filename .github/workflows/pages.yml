@@ -1,8 +1,14 @@
 name: Deploy to GitHub Pages
 
 # Every push to main rebuilds the prototype and publishes it, so the live site
-# can never drift from the source. The build output in docs/ is still committed
-# as a fallback for the "deploy from a branch" Pages source.
+# can never drift from the source.
+#
+# Turning Pages on is not something this workflow can do for you: the Actions
+# token is refused by the create-a-Pages-site API ("Resource not accessible by
+# integration"). So the deploy steps are skipped, with a warning, until a human
+# has set Settings -> Pages -> Source to "GitHub Actions" once. Skipping rather
+# than failing keeps main green while that is outstanding, and the warning says
+# exactly what is missing.
 
 on:
   push:
@@ -22,6 +28,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      pages_ready: ${{ steps.pages.outputs.ready }}
     defaults:
       run:
         working-directory: app
@@ -42,18 +50,50 @@ jobs:
       - name: Build
         run: npm run build
 
-      # `enablement: true` turns Pages on via the API if it has never been
-      # switched on, so the site can go live without visiting Settings.
+      - name: Is Pages set up to publish from Actions?
+        id: pages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          status=$(curl -sS -o /tmp/pages.json -w '%{http_code}' \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$REPO/pages")
+
+          if [ "$status" = "404" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::GitHub Pages is not enabled. Turn it on at Settings -> Pages with Source = GitHub Actions; every push will then publish automatically."
+            exit 0
+          fi
+
+          if [ "$status" != "200" ]; then
+            echo "::error::Unexpected HTTP $status from the Pages API."
+            cat /tmp/pages.json
+            exit 1
+          fi
+
+          build_type=$(jq -r '.build_type // "unknown"' /tmp/pages.json)
+          if [ "$build_type" != "workflow" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Pages is enabled but publishes from '$build_type', not Actions. Set Settings -> Pages -> Source to GitHub Actions to publish this build."
+            exit 0
+          fi
+
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
+        if: steps.pages.outputs.ready == 'true'
 
       - uses: actions/upload-pages-artifact@v3
+        if: steps.pages.outputs.ready == 'true'
         with:
           path: docs
 
   deploy:
     needs: build
+    if: needs.build.outputs.pages_ready == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
