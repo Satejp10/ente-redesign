@@ -209,3 +209,35 @@ vs Immich's look where they disagree) are still unanswered; both are running on
 their stated defaults.
 
 **Next:** the viewer (open a photo), then multi-select — one PR each.
+
+---
+
+## 2026-09-21 — Continuous deploy to Pages
+
+**Session:** `session_01BM4Nbwy1PXGxL1AFMySpz4` (Claude Code web) — same session as
+the entry above, recorded separately rather than editing it.
+
+**Why:** PR #3 merged, but nothing was live. GitHub Pages had never been switched
+on, so the built site sat in `docs/` on `main` with no one serving it. The owner
+asked for continuous deployment and a link at the top of the README.
+
+**Did:**
+- Added `.github/workflows/pages.yml`: typecheck, build, publish on every push to
+  `main`. Uses `actions/configure-pages@v5` with `enablement: true`, which turns
+  Pages on through the API if it has never been enabled — so the site can go live
+  without anyone visiting Settings.
+- Linked <https://satejp10.github.io/ente-redesign/> at the top of `README.md`.
+
+**Resolved an unverified claim:** `HANDOFF.md` Section 3 said "Cloud sessions may
+not be allowed to push `.github/workflows/` (unverified)", and chose the
+`/docs` Pages route to avoid it. **They can** — probe-pushed a workflow file
+successfully at 11:5xZ. The `/docs` output stays committed anyway as a fallback
+for the "deploy from a branch" source, which costs nothing and means either
+Pages setting produces a working site.
+
+**Not doable from here:** there is no GitHub Pages tool in this session's GitHub
+access, so Pages cannot be enabled by API call from the session itself. The
+workflow's `enablement: true` is the way round that; if the repository blocks it,
+the owner flips one switch in Settings once.
+
+**Next:** unchanged — the viewer (open a photo), then multi-select.

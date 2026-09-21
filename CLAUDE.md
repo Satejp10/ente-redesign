@@ -25,8 +25,9 @@ This is a hobby demo. Front end only, fake data, no backend.
   "unofficial concept" label.
 - **No backend, accounts, uploads, encryption or real APIs.** Fake data only.
 - **No AI surfaces** — no "Ask", no suggestion cards, no auto-creations.
-- **`docs/` is generated and committed.** GitHub Pages serves the site from
-  `main` → `/docs`. Never hand-edit it; rebuild instead.
+- **`docs/` is generated and committed.** Never hand-edit it; rebuild instead.
+  Rebuild it in any commit that changes `app/`, so the fallback Pages source
+  stays in step with the source.
 
 ## Out of scope
 
@@ -51,6 +52,15 @@ real viewport, and a server has no viewport to measure. Base path is
 `/ente-redesign`; override with `BASE_PATH=''` for a root-hosted preview.
 
 Append `?debug` to the URL for a live count of tiles in the DOM.
+
+## Deployment
+
+Live at <https://satejp10.github.io/ente-redesign/>.
+
+`.github/workflows/pages.yml` rebuilds and publishes on every push to `main`;
+it typechecks first, so a push that fails `npm run check` does not deploy.
+Pushing to `.github/workflows/` from a cloud session works — verified
+2026-09-21, contrary to what `HANDOFF.md` assumed.
 
 ## Design tokens — "Ash"
 
