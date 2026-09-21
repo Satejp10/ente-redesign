@@ -1,5 +1,11 @@
 # ente-redesign
 
+### ▶ [Open the prototype](https://satejp10.github.io/ente-redesign/)
+
+Best judged on a phone. Add it to your home screen for the full-screen version.
+
+---
+
 An **unofficial redesign concept** of the Ente Photos mobile app. Not affiliated
 with Ente, Immich or Google. Front end only, fake data, no backend.
 
@@ -25,6 +31,13 @@ npm run build    # writes the static site to ../docs
 ```
 
 Append `?debug` to the URL to see how many tiles are in the DOM at once.
+
+## Deployment
+
+Every push to `main` rebuilds the site and publishes it, via
+`.github/workflows/pages.yml`. There is nothing to run by hand and the live site
+cannot drift from the source. The build output is also committed to `docs/` so
+the "deploy from a branch" Pages source works as a fallback.
 
 ## Current state
 
