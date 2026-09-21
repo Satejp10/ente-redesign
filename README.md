@@ -35,9 +35,16 @@ Append `?debug` to the URL to see how many tiles are in the DOM at once.
 ## Deployment
 
 Every push to `main` rebuilds the site and publishes it, via
-`.github/workflows/pages.yml`. There is nothing to run by hand and the live site
-cannot drift from the source. The build output is also committed to `docs/` so
-the "deploy from a branch" Pages source works as a fallback.
+`.github/workflows/pages.yml`. Nothing to run by hand, and the live site cannot
+drift from the source.
+
+**One-time setup:** Settings → Pages → Source → **GitHub Actions**. A workflow
+cannot do this itself — GitHub refuses the Actions token on the
+create-a-Pages-site API. Until it is done the workflow skips the deploy and
+prints a warning rather than failing.
+
+The build output is also committed to `docs/`, so "Deploy from a branch"
+(`main` → `/docs`) works as an alternative source.
 
 ## Current state
 
